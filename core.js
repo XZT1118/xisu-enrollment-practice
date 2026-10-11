@@ -18,7 +18,7 @@ export const GROUPS = [
     field('major', '专业', 'select', { required: true, options: MAJORS, hint: '请使用专业全称，不要填写简称。' }),
     field('className', '所在班', 'text', { required: true, placeholder: '按学校通知填写班级', hint: '请使用本班老师通知的统一名称。' }),
     field('gender', '性别', 'select', { options: ['男', '女'] }),
-    field('birthDate', '出生日期', 'date', { required: true }),
+    field('birthDate', '出生日期', 'month', { required: true, hint: '仅填写出生年月，不需要填写日。' }),
     field('idNumber', '身份证号', 'text', { required: true, placeholder: '18位身份证号，末位可为 X', wide: true, maxlength: 18 }),
     field('enrollmentMonth', '入学年月', 'month', { required: true }),
     field('origin', '生源地', 'text', { placeholder: '如：陕西省渭南市合阳县', hint: '填写到县、区或县级市；直辖市如：北京市海淀区。' }),
@@ -139,7 +139,7 @@ export function validateDraft(draft, now = new Date()) {
     }
     if (metadata.type === 'month') {
       if (!isMonth(value)) add(key, `${label}不是有效年月。`);
-      else if (value > currentMonth) add(key, `${label}晚于当前月份，请确认学校通知。`, 'warning');
+      else if (value > currentMonth) add(key, key === 'birthDate' ? '出生年月不能晚于当前月份。' : `${label}晚于当前月份，请确认学校通知。`, key === 'birthDate' ? 'error' : 'warning');
     }
     if (key.toLowerCase().includes('postal') && !/^\d{6}$/.test(value)) add(key, `${label}应为6位数字。`);
     if (metadata.type === 'tel' && !isPhone(value)) add(key, `${label}应为11位手机号码，或带区号的固定电话。`);
@@ -149,10 +149,10 @@ export function validateDraft(draft, now = new Date()) {
   if (identity && !identity.valid) add('idNumber', identity.message);
   if (identity?.valid) {
     if (identity.birthday > today) add('idNumber', '身份证号中的出生日期不能晚于今天。');
-    if (draft.fields.birthDate && identity.birthday !== draft.fields.birthDate) add('birthDate', '出生日期与身份证号不一致，请核对。', 'warning');
+    if (draft.fields.birthDate && identity.birthday.slice(0, 7) !== draft.fields.birthDate) add('birthDate', '出生年月与身份证号不一致，请核对。', 'warning');
     if (draft.fields.gender && identity.gender !== draft.fields.gender) add('gender', '性别与身份证号不一致，请核对。', 'warning');
   }
-  if (isDate(draft.fields.birthDate) && isMonth(draft.fields.enrollmentMonth) && draft.fields.enrollmentMonth <= draft.fields.birthDate.slice(0, 7)) add('enrollmentMonth', '入学年月应晚于出生年月。');
+  if (isMonth(draft.fields.birthDate) && isMonth(draft.fields.enrollmentMonth) && draft.fields.enrollmentMonth <= draft.fields.birthDate) add('enrollmentMonth', '入学年月应晚于出生年月。');
   if (!draft.contactNeeded) add('contactNeeded', '请确认是否需要填写本地联系人。', 'warning', 2);
   const activeResume = draft.resume.filter(row => row.start || row.end || row.organization || row.witness);
   if (!activeResume.length) add('resume', '本人简历尚未填写，请从小学填起。', 'warning', 3);
@@ -166,7 +166,7 @@ export function validateDraft(draft, now = new Date()) {
       else if (row[key] > currentMonth) add(`${prefix}.${key}`, '简历年月晚于当前月份，请确认。', 'warning', 3);
     }
     if (!row.end && !row.ongoing) add(`${prefix}.end`, '请填写简历结束年月，或选择“至今”。', 'warning', 3);
-    if (isMonth(row.start) && isDate(draft.fields.birthDate) && row.start < draft.fields.birthDate.slice(0, 7)) add(`${prefix}.start`, '简历开始年月早于出生年月，请核对。', 'warning', 3);
+    if (isMonth(row.start) && isMonth(draft.fields.birthDate) && row.start < draft.fields.birthDate) add(`${prefix}.start`, '简历开始年月早于出生年月，请核对。', 'warning', 3);
     if (isMonth(row.start) && isMonth(row.end) && !row.ongoing && row.start > row.end) add(`${prefix}.end`, '简历结束年月不能早于开始年月。', 'error', 3);
     if (previousEnd && row.start && row.start < previousEnd) add(`${prefix}.start`, '这段简历与上一段时间重叠，请核对顺序。', 'warning', 3);
     previousEnd = row.ongoing ? currentMonth : row.end;
@@ -216,6 +216,7 @@ export function normalizeDraft(value, now = new Date()) {
   if (!value || ![1, 2].includes(value.schemaVersion) || !value.fields || !Array.isArray(value.resume) || !Array.isArray(value.relatives)) throw new Error('草稿格式无法识别');
   const draft = createDraft(now);
   for (const metadata of ALL_FIELDS) if (typeof value.fields[metadata.key] === 'string') draft.fields[metadata.key] = value.fields[metadata.key];
+  if (isDate(draft.fields.birthDate)) draft.fields.birthDate = draft.fields.birthDate.slice(0, 7);
   draft.fields.educationMode = '全日制';
   if (!draft.fields.college.trim()) draft.fields.college = '商学院';
   draft.activeDocument = value.activeDocument === 'archive' ? 'archive' : 'student';
