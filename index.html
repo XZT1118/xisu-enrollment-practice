@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#edf1fb">
+  <meta name="description" content="西安外国语大学新生材料填写练习，支持学籍卡和新生档案审查表。先填写、核对，再抄写到纸质表格。">
+  <title>新生材料 · 填写练习</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="ambient ambient-three" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="新生材料填写练习首页"><span class="brand-symbol" aria-hidden="true">学</span><span>新生材料<span class="brand-divider">/</span><span class="brand-light">填写练习</span></span></a>
+    <div class="header-tools"><span id="save-status" class="save-status" role="status">草稿准备中</span><button id="clear-draft" class="text-button" type="button">清空草稿</button></div>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow"><span class="tiny-spark" aria-hidden="true">✦</span> 西安外国语大学 · 新生填写指南</div>
+      <h1 id="page-title">先练习，再落笔<span class="title-dot">。</span></h1>
+      <p>把信息填准确，把新生材料写漂亮。<br class="mobile-break">随时修改，核对无误后再抄写到纸质表格。</p>
+      <div class="intro-tags"><span><i class="tag-dot"></i> 仅保存在当前浏览器</span><span><i class="tag-dot violet"></i> 培养层次：本科</span><span><i class="tag-dot blue"></i> 支持正反面预览</span></div>
+    </section>
+    <nav id="document-navigation" class="document-navigation glass" aria-label="选择填写材料">
+      <button type="button" data-document="student" aria-pressed="true"><span aria-hidden="true">01</span> 学籍卡</button>
+      <button type="button" data-document="archive" aria-pressed="false"><span aria-hidden="true">02</span> 新生档案审查表</button>
+      <p>同名信息共用，填写一次同步两份表</p>
+    </nav>
+    <section class="workspace" aria-label="填写与预览">
+      <div class="editor-column">
+        <nav class="step-navigation glass" aria-label="填写步骤" id="step-navigation"></nav>
+        <section class="editor glass" aria-labelledby="step-title">
+          <div class="editor-heading"><div><span id="step-kicker" class="section-kicker"></span><h2 id="step-title" tabindex="-1"></h2></div><span id="step-mark" class="section-mark" aria-hidden="true"></span></div>
+          <p id="step-description" class="section-description"></p>
+          <div id="step-content"></div>
+          <div class="editor-footer"><button id="previous-step" class="button secondary" type="button">上一步</button><span id="step-position"></span><button id="next-step" class="button primary" type="button">下一步 <span aria-hidden="true">→</span></button></div>
+        </section>
+        <div class="privacy-note"><span aria-hidden="true">◇</span> 信息留在本机，修改后自动保存。格式检查通过后，仍需老师当面核对。</div>
+      </div>
+      <aside class="preview-panel glass" aria-labelledby="preview-title">
+        <div class="preview-heading"><div><span class="section-kicker">LIVE PREVIEW</span><h2 id="preview-title">纸卡预览</h2></div><span class="live-chip"><i></i> 实时同步</span></div>
+        <div class="preview-toolbar"><div id="face-tabs" class="segmented" role="group" aria-label="预览正反面"><button id="front-tab" class="active" type="button" aria-pressed="true">正面</button><button id="back-tab" type="button" aria-pressed="false">反面</button></div><span id="archive-preview-label" class="portrait-chip" hidden>竖向 A4 · 一页</span><button id="expand-preview" class="text-button" type="button">放大查看 <span aria-hidden="true">↗</span></button></div>
+        <div class="preview-surface" id="preview-surface"><div class="paper-stage" id="paper-stage"></div></div>
+        <div id="overflow-status" class="overflow-status" role="status" hidden></div>
+        <div class="preview-caption"><span>与纸质卡字段一一对应</span><span>核对稿</span></div>
+        <div class="preview-tip"><span class="tip-icon" aria-hidden="true">i</span><p id="preview-tip-text">预览会随着填写更新。空白部分保留原样，奖励与处分如无可留空。</p></div>
+        <button id="check-all" class="button check-button" type="button"><span aria-hidden="true">✓</span> 检查全部信息</button>
+        <p id="check-summary" class="check-summary" role="status">先完成填写，再一起检查格式。</p>
+      </aside>
+    </section>
+    <footer class="site-footer"><span>每一次认真填写，都是新的开始。</span><span>新生材料填写练习 · 非正式提交</span></footer>
+  </main>
+  <dialog id="preview-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-heading"><div><span class="section-kicker">PAPER CARD</span><h2 id="dialog-title">正反面核对预览</h2></div><button id="close-preview" class="button secondary" type="button">关闭</button></div>
+    <p class="dialog-tip">手机可左右滑动查看完整表格。完成老师核对后，再照着纸卡位置抄写。</p>
+    <div id="expanded-papers" class="expanded-papers"></div>
+    <div class="dialog-footer"><button id="dialog-edit" class="button secondary" type="button">返回修改</button><button id="dialog-print" class="button primary" type="button">打印 / 另存 PDF</button></div>
+  </dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="print-root" aria-hidden="true"></div>
+</body>
+</html>
